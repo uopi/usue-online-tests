@@ -6,7 +6,7 @@ using Test_Wrapper;
 
 namespace usue_online_tests.Tests.PolynomA
 {
-    public class MatrixAlgebra11 : ITestCreator, ITest, ITestGroup
+    public class MatrixAlgebra11 : ITestCreator, ITest, ITestGroup, ITimeLimit
     {
         public int TestID { get; set; }
         public string Name { get; } = "Детерминант01";
