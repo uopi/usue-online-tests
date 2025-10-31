@@ -18,8 +18,7 @@ namespace usue_online_tests.Tests.PolynomA
         private static readonly char[] LetterB = { 'M', 'P', 'Q', 'X', 'Y', 'Z', 'T' };
         public ITest CreateTest(int randomSeed)
         {
-            var random = new Random(randomSeed);
-            Span<char> letters = GenLetters(random);
+            Span<char> letters = GenLetters(randomSeed);
             char letterU = letters[0];
             char letterB = letters[1];
 
@@ -29,7 +28,7 @@ namespace usue_online_tests.Tests.PolynomA
                 $"Отметьте щелчком мыши в поле для ввода те пункты," +
                 $" в которых приведено характеристическое свойство " +
                 $"\\(\\Phi(\\textbf{{{letterB}}})\\) подмножества " +
-                $"\\(\\{{\\textbf{{{letterB}}}(x)\\mid \\Phi(\\textbf{{{letterB}}})\\}}\\), определяющие подпространство:";
+                $"\\(\\left\\{{\\textbf{{{letterB}}}(x)\\mid \\Phi(\\textbf{{{letterB}}})\\right\\}}\\), определяющие подпространство:";
 
             result.CheckBoxes = GenFormuls(randomSeed);
             
@@ -39,24 +38,22 @@ namespace usue_online_tests.Tests.PolynomA
 
         public int CheckAnswer(int randomSeed, Dictionary<string, string> answers)
         {
-            int[] nums = GenNum(randomSeed).Take(3).ToArray();
-            //int i = 1;
-            //foreach (var num in nums)
-            //{
-            //    Console.WriteLine($"CheckAnsw {i++} {num}");
-            //}
 
             string[] questions = GenFormuls(randomSeed);
             var total = 0;
 
-            for (int i = 0; i < 6; i++)
-                if (answers.TryGetValue(questions[i], out var va) && va == "on" && nums.Contains(i + 1)) total++;
+            
 
             return total;
         }
 
-        private string[] GenFormuls(Random rand)
+        private string[] GenFormuls(int seed)
         {
+            var rand = new Random(seed);
+
+            char letterU = LetterU[rand.Next(0, LetterU.Length)];
+            char letterB = LetterB[rand.Next(0, LetterB.Length)];
+
             List<int> listAB = new List<int> { 1, 2, 3, 4, 5, 6 };
             int Ax = listAB[rand.Next(0, listAB.Count)];
             listAB.Remove(Ax);
@@ -85,19 +82,89 @@ namespace usue_online_tests.Tests.PolynomA
             listCD.Remove(Ey);
             int Fx = listCD[rand.Next(0, listCD.Count)];
             listCD.Remove(Fx);
-            int Fy = listCD[rand.Next(0, listCD.Count)] ;
+            int Fy = listCD[rand.Next(0, listCD.Count)];
 
 
             return new string[]
             {
+                $"\\(\\textbf{{{letterB}}}\\cdot" +          //Ax
+                $"\\left(\\begin{{array}}{{cc}}" +
+                $"{Cx} & {Cy} \\\\" +
+                $"{Dx} & {Dy} \\\\" +
+                $"\\end{{array}}\\right)\\) = " +
+                $"\\(\\left(\\begin{{array}}{{cc}}" +
+                $"0 & 0 \\\\" +
+                $"0 & 0 \\\\" +
+                $"\\end{{array}}\\right)\\)",
 
+                $"\\(\\left(\\begin{{array}}{{cc}}" +        //Ay
+                $"{Cx} & {Cy} \\\\" +
+                $"{Dx} & {Dy} " +
+                $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                $"\\(\\left(\\begin{{array}}{{cc}}" +
+                $"0 & 0 \\\\" +
+                $"0 & 0 " +
+                $"\\end{{array}}\\right)\\)",
+
+                $"\\(\\textbf{{{letterB}}}\\cdot" +         //Az
+                $"\\left(\\begin{{array}}{{cc}}" +
+                $"{Cx} & {Cy} \\\\" +
+                $"{Dx} & {Dy}" +
+                $"\\end{{array}}\\right)\\) + " +
+                $"\\(\\left(\\begin{{array}}{{cc}}" +
+                $"{Cx} & {Cy} \\\\" +
+                $"{Dx} & {Dy}" +
+                $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                $"\\(\\left(\\begin{{array}}{{cc}}" +
+                $"0 & 0 \\\\" +
+                $"0 & 0 \\\\" +
+                $"\\end{{array}}\\right)\\)",
+
+                $"\\(\\textbf{{{letterB}}}\\cdot" +        //Bx
+                $"\\left(\\begin{{array}}{{cc}}" +
+                $"{Cx} & {Cy} \\\\" +
+                $"{Dx} & {Dy}" +
+                $"\\end{{array}}\\right)\\) = " +
+                $"\\(\\left(\\begin{{array}}{{cc}}" +
+                $"{Ex} & {Ey} \\\\" +
+                $"{Fx} & {Fy}" +
+                $"\\end{{array}}\\right)\\)",
+
+                $"\\(\\left(\\begin{{array}}{{cc}}" +        //By
+                $"{Cx} & {Cy} \\\\" +
+                $"{Dx} & {Dy} " +
+                $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                $"\\(\\left(\\begin{{array}}{{cc}}" +
+                $"{Ex} & {Ey} \\\\" +
+                $"{Fx} & {Fy} " +
+                $"\\end{{array}}\\right)\\)",
+
+                $"\\(\\textbf{{{letterB}}}\\cdot" +         //Bz
+                $"\\left(\\begin{{array}}{{cc}}" +
+                $"{Cx} & {Cy} \\\\" +
+                $"{Dx} & {Dy}" +
+                $"\\end{{array}}\\right)\\) + " +
+                $"\\(\\left(\\begin{{array}}{{cc}}" +
+                $"{Cx} & {Cy} \\\\" +
+                $"{Dx} & {Dy}" +
+                $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                $"\\(\\left(\\begin{{array}}{{cc}}" +
+                $"{Ex} & {Ey} \\\\" +
+                $"{Fx} & {Fy} \\\\" +
+                $"\\end{{array}}\\right)\\)"
             };
         }
-        private char[] GenLetters(Random rand)
+
+        private char[] GenLetters(int seed)
         {
-            return new[] { LetterU[rand.Next(0, LetterU.Length)],
-                           LetterB[rand.Next(0, LetterB.Length)]};
+            Random rand = new Random(seed);
+            return new char[]
+            {
+                LetterU[rand.Next(0, LetterU.Length)],
+                LetterB[rand.Next(0, LetterB.Length)]
+            };
         }
+        
         public string Text { get; set; }
         public string[] CheckBoxes { get; set; }
         public List<MemoryStream> Pictures { get; set; }

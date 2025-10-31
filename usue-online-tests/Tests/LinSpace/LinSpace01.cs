@@ -27,7 +27,7 @@ namespace usue_online_tests.Tests.PolynomA
                 $"Пусть {letterU} - линейное пространство для многочленов степени, не выше 3. " +
                 $"Отметьте щелчком мыши в поле для ввода те пункты, в которых приведено" +
                 $" характеристическое свойство \\(F({letterA}(x))\\) подмножества " +
-                $"\\(\\{{{letterA}(x)\\mid \\Phi({letterA}(x))\\}}\\), определите подпространство:\n";
+                $"\\(\\left\\{{{letterA}(x)\\mid \\Phi({letterA}(x))\\right\\}}\\), определите подпространство:\n";
 
             result.CheckBoxes = GenFormuls(randomSeed);
             
