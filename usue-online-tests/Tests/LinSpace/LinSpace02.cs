@@ -53,7 +53,7 @@ namespace usue_online_tests.Tests.PolynomA
             }
             
 
-            return total;
+            return total==3 ? 6 : total;
         }
 
         private record TestData(
