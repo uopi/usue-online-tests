@@ -15,10 +15,9 @@ namespace usue_online_tests.Tests.PolynomA
         public string Description { get; } = "Определение подпространства";
         public string GroupName { get; set; } = "LinSpace";
         private static readonly char[] LetterU = { 'U', 'V', 'W', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
-        private static readonly char[] LetterA = { 'p', 'q', 'r', 'x', 'y', 'z', 't' };
+        private static readonly char[] LetterA = { 'p', 'q', 'r', 'y', 'z', 't' };
         public ITest CreateTest(int randomSeed)
         {
-            var rand = new Random(randomSeed);
             Span<char> letters = GenLetters(randomSeed);
             char letterU = letters[0];
             char letterA = letters[1];
@@ -27,8 +26,8 @@ namespace usue_online_tests.Tests.PolynomA
             result.Text =
                 $"Пусть {letterU} - линейное пространство для многочленов степени, не выше 3. " +
                 $"Отметьте щелчком мыши в поле для ввода те пункты, в которых приведено" +
-                $" характеристическое свойство F({letterA}(x)) подмножества " +
-                $"\\(\\{{{letterA}(x) | F({letterA}(x))\\}}, определите подпространство:\\)\n";
+                $" характеристическое свойство \\(F({letterA}(x))\\) подмножества " +
+                $"\\(\\{{{letterA}(x)\\mid \\Phi({letterA}(x))\\}}\\), определите подпространство:\n";
 
             result.CheckBoxes = GenFormuls(randomSeed);
             
@@ -39,12 +38,17 @@ namespace usue_online_tests.Tests.PolynomA
         public int CheckAnswer(int randomSeed, Dictionary<string, string> answers)
         {
             int[] nums = GenNum(randomSeed).Take(3).ToArray();
+            //int i = 1;
+            //foreach (var num in nums)
+            //{
+            //    Console.WriteLine($"CheckAnsw {i++} {num}");
+            //}
 
             string[] questions = GenFormuls(randomSeed);
             var total = 0;
 
             for (int i = 0; i < 6; i++)
-                if (answers.TryGetValue(questions[i], out var val) && val == "on" && nums.Contains(i + 1)) total++;
+                if (answers.TryGetValue(questions[i], out var va) && va == "on" && nums.Contains(i + 1)) total++;
 
             return total;
         }
@@ -71,7 +75,7 @@ namespace usue_online_tests.Tests.PolynomA
                 $"\\({letterA}({Cx}) = {Dx}\\)",
                 $"\\({letterA}(0) = {Cx}\\)",
                 $"\\({Cy}\\cdot {letterA}({Cx}) + {Dx}\\cdot {letterA}({Dy}) = {Dz}\\)"
-            };
+            }.Select(s => s.Replace("+-", "-").Replace("-+", "-").Replace("--", "+")).ToArray();
         }
         private char[] GenLetters(int seed)
         {
@@ -111,7 +115,9 @@ namespace usue_online_tests.Tests.PolynomA
             int Dy = listCD[random.Next(0, listCD.Count)];
             listCD.Remove(Dy);
             int Dz = listCD[random.Next(0, listCD.Count)];
-            return new int[]{ 
+
+            return new int[]
+            { 
 
                             Ax, Ay, Az,
                             Bx, By, Bz,
