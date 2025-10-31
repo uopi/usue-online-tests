@@ -1,6 +1,7 @@
 ﻿using NuGet.ContentModel;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -30,7 +31,7 @@ namespace usue_online_tests.Tests.PolynomA
                 $"\\(\\Phi(\\textbf{{{letterB}}})\\) подмножества " +
                 $"\\(\\left\\{{\\textbf{{{letterB}}}(x)\\mid \\Phi(\\textbf{{{letterB}}})\\right\\}}\\), определяющие подпространство:";
 
-            result.CheckBoxes = GenFormuls(randomSeed);
+            result.CheckBoxes = GenFormuls(randomSeed).Formuls;
             
 
             return result;
@@ -38,16 +39,29 @@ namespace usue_online_tests.Tests.PolynomA
 
         public int CheckAnswer(int randomSeed, Dictionary<string, string> answers)
         {
+            var _struct = GenFormuls(randomSeed);
+            string[] questions = _struct.Formuls;
 
-            string[] questions = GenFormuls(randomSeed);
+            int[] nums = { _struct.Ax, _struct.Ay, _struct.Az };
+
             var total = 0;
+            int index = 1;
 
+            foreach (var answer in answers)
+            {
+                if (answers.TryGetValue(questions[index-1], out var va) && va == "on" && nums.Contains(index++)) total++;
+            }
             
 
             return total;
         }
 
-        private string[] GenFormuls(int seed)
+        private record TestData(
+            string[] Formuls,
+            int Ax, int Ay, int Az);
+
+
+        private TestData GenFormuls(int seed)
         {
             var rand = new Random(seed);
 
@@ -84,8 +98,7 @@ namespace usue_online_tests.Tests.PolynomA
             listCD.Remove(Fx);
             int Fy = listCD[rand.Next(0, listCD.Count)];
 
-
-            return new string[]
+            List<string> final = new List<string>
             {
                 $"\\(\\textbf{{{letterB}}}\\cdot" +          //Ax
                 $"\\left(\\begin{{array}}{{cc}}" +
@@ -118,41 +131,166 @@ namespace usue_online_tests.Tests.PolynomA
                 $"\\(\\left(\\begin{{array}}{{cc}}" +
                 $"0 & 0 \\\\" +
                 $"0 & 0 \\\\" +
-                $"\\end{{array}}\\right)\\)",
-
-                $"\\(\\textbf{{{letterB}}}\\cdot" +        //Bx
-                $"\\left(\\begin{{array}}{{cc}}" +
-                $"{Cx} & {Cy} \\\\" +
-                $"{Dx} & {Dy}" +
-                $"\\end{{array}}\\right)\\) = " +
-                $"\\(\\left(\\begin{{array}}{{cc}}" +
-                $"{Ex} & {Ey} \\\\" +
-                $"{Fx} & {Fy}" +
-                $"\\end{{array}}\\right)\\)",
-
-                $"\\(\\left(\\begin{{array}}{{cc}}" +        //By
-                $"{Cx} & {Cy} \\\\" +
-                $"{Dx} & {Dy} " +
-                $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
-                $"\\(\\left(\\begin{{array}}{{cc}}" +
-                $"{Ex} & {Ey} \\\\" +
-                $"{Fx} & {Fy} " +
-                $"\\end{{array}}\\right)\\)",
-
-                $"\\(\\textbf{{{letterB}}}\\cdot" +         //Bz
-                $"\\left(\\begin{{array}}{{cc}}" +
-                $"{Cx} & {Cy} \\\\" +
-                $"{Dx} & {Dy}" +
-                $"\\end{{array}}\\right)\\) + " +
-                $"\\(\\left(\\begin{{array}}{{cc}}" +
-                $"{Cx} & {Cy} \\\\" +
-                $"{Dx} & {Dy}" +
-                $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
-                $"\\(\\left(\\begin{{array}}{{cc}}" +
-                $"{Ex} & {Ey} \\\\" +
-                $"{Fx} & {Fy} \\\\" +
                 $"\\end{{array}}\\right)\\)"
             };
+            int i = rand.Next(-3, 3); 
+
+            if (i < -1)
+            {
+                if (i == -3)
+                {
+                    final.Add(
+                        $"\\(\\textbf{{{letterB}}}\\cdot" +        //Bx
+                        $"\\left(\\begin{{array}}{{cc}}" +
+                        $"{Cx} & {Dx} \\\\" +
+                        $"{Cy} & {Dy}" +
+                        $"\\end{{array}}\\right)\\) = " +
+                        $"\\(\\left(\\begin{{array}}{{cc}}" +
+                        $"{Ex} & {Ey} \\\\" +
+                        $"{Fx} & {Fy}" +
+                        $"\\end{{array}}\\right)\\)");
+
+                    final.Add(
+                        $"\\(\\left(\\begin{{array}}{{cc}}" +        //By
+                        $"{Cx} & {Dx} \\\\" +
+                        $"{Cy} & {Dy} " +
+                        $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                        $"\\(\\left(\\begin{{array}}{{cc}}" +
+                        $"{Ex} & {Ey} \\\\" +
+                        $"{Fx} & {Fy} " +
+                        $"\\end{{array}}\\right)\\)");
+
+                    final.Add(
+                        $"\\(\\textbf{{{letterB}}}\\cdot" +         //Bz
+                        $"\\left(\\begin{{array}}{{cc}}" +
+                        $"{Cx} & {Cy} \\\\" +
+                        $"{Dx} & {Dy}" +
+                        $"\\end{{array}}\\right)\\) + " +
+                        $"\\(\\left(\\begin{{array}}{{cc}}" +
+                        $"{Cx} & {Cy} \\\\" +
+                        $"{Dx} & {Dy}" +
+                        $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                        $"\\(\\left(\\begin{{array}}{{cc}}" +
+                        $"{Ex} & {Ey} \\\\" +
+                        $"{Fx} & {Fy} \\\\" +
+                        $"\\end{{array}}\\right)\\)");
+                }
+                else
+                {
+                    final.Add(
+                        $"\\(\\textbf{{{letterB}}}\\cdot" +        //Bx
+                        $"\\left(\\begin{{array}}{{cc}}" +
+                        $"{Cx} & {Dx} \\\\" +
+                        $"{Cy} & {Dy}" +
+                        $"\\end{{array}}\\right)\\) = " +
+                        $"\\(\\left(\\begin{{array}}{{cc}}" +
+                        $"{Ex} & {Ey} \\\\" +
+                        $"{Fx} & {Fy}" +
+                        $"\\end{{array}}\\right)\\)");
+
+                    final.Add(
+                        $"\\(\\left(\\begin{{array}}{{cc}}" +        //By
+                        $"{Cx} & {Cy} \\\\" +
+                        $"{Dx} & {Dy} " +
+                        $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                        $"\\(\\left(\\begin{{array}}{{cc}}" +
+                        $"{Ex} & {Ey} \\\\" +
+                        $"{Fx} & {Fy} " +
+                        $"\\end{{array}}\\right)\\)");
+
+                    final.Add(
+                        $"\\(\\textbf{{{letterB}}}\\cdot" +         //Bz
+                        $"\\left(\\begin{{array}}{{cc}}" +
+                        $"{Cx} & {Dx} \\\\" +
+                        $"{Cy} & {Dy}" +
+                        $"\\end{{array}}\\right)\\) + " +
+                        $"\\(\\left(\\begin{{array}}{{cc}}" +
+                        $"{Cx} & {Dx} \\\\" +
+                        $"{Cy} & {Dy}" +
+                        $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                        $"\\(\\left(\\begin{{array}}{{cc}}" +
+                        $"{Ex} & {Ey} \\\\" +
+                        $"{Fx} & {Fy} \\\\" +
+                        $"\\end{{array}}\\right)\\)");
+                };
+                return new TestData(final.ToArray(), Ax, Ay, Az);
+            }
+            if (i == 2)
+            {
+                final.Add(
+                    $"\\(\\textbf{{{letterB}}}\\cdot" +                                     //Bx
+                    $"\\left(\\begin{{array}}{{cc}}" +
+                    $"{Cx} & {Cy} \\\\" +
+                    $"{Dx} & {Dy}" +
+                    $"\\end{{array}}\\right)\\) = " +
+                    $"\\(\\left(\\begin{{array}}{{cc}}" +
+                    $"{Ex} & {Ey} \\\\" +
+                    $"{Fx} & {Fy}" +
+                    $"\\end{{array}}\\right)\\)");
+
+                final.Add(
+                    $"\\(\\textbf{{{letterB}}}\\cdot\\left(\\begin{{array}}{{cc}}" +        //By
+                    $"{Cx} & {Cy} \\\\" +
+                    $"{Dx} & {Dy} " +
+                    $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                    $"\\(\\left(\\begin{{array}}{{cc}}" +
+                    $"{Ex} & {Ey} \\\\" +
+                    $"{Fx} & {Fy} " +
+                    $"\\end{{array}}\\right)\\)");
+
+                final.Add(
+                    $"\\(\\textbf{{{letterB}}}\\cdot" +                                     //Bz
+                    $"\\left(\\begin{{array}}{{cc}}" +
+                    $"{Cx} & {Cy} \\\\" +
+                    $"{Dx} & {Dy}" +
+                    $"\\end{{array}}\\right)\\) + " +
+                    $"\\(\\left(\\begin{{array}}{{cc}}" +
+                    $"{Cx} & {Cy} \\\\" +
+                    $"{Dx} & {Dy}" +
+                    $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                    $"\\(\\left(\\begin{{array}}{{cc}}" +
+                    $"{Ex} & {Ey} \\\\" +
+                    $"{Fx} & {Fy} \\\\" +
+                    $"\\end{{array}}\\right)\\)");
+                return new TestData(final.ToArray(), Ax, Ay, Az);
+            }
+            else
+            {
+                final.Add(
+                    $"\\(\\textbf{{{letterB}}}\\cdot" +        //Bx
+                    $"\\left(\\begin{{array}}{{cc}}" +
+                    $"{Cx} & {Cy} \\\\" +
+                    $"{Dx} & {Dy}" +
+                    $"\\end{{array}}\\right)\\) = " +
+                    $"\\(\\left(\\begin{{array}}{{cc}}" +
+                    $"{Ex} & {Ey} \\\\" +
+                    $"{Fx} & {Fy}" +
+                    $"\\end{{array}}\\right)\\)");
+                final.Add(
+                    $"\\(\\left(\\begin{{array}}{{cc}}" +        //By
+                    $"{Cx} & {Cy} \\\\" +
+                    $"{Dx} & {Dy} " +
+                    $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                    $"\\(\\left(\\begin{{array}}{{cc}}" +
+                    $"{Ex} & {Ey} \\\\" +
+                    $"{Fx} & {Fy} " +
+                    $"\\end{{array}}\\right)\\)");
+                final.Add(
+                    $"\\(\\textbf{{{letterB}}}\\cdot" +         //Bz
+                    $"\\left(\\begin{{array}}{{cc}}" +
+                    $"{Cx} & {Cy} \\\\" +
+                    $"{Dx} & {Dy}" +
+                    $"\\end{{array}}\\right)\\) + " +
+                    $"\\(\\left(\\begin{{array}}{{cc}}" +
+                    $"{Cx} & {Cy} \\\\" +
+                    $"{Dx} & {Dy}" +
+                    $"\\end{{array}}\\right)\\cdot\\textbf{{{letterB}}}\\) = " +
+                    $"\\(\\left(\\begin{{array}}{{cc}}" +
+                    $"{Ex} & {Ey} \\\\" +
+                    $"{Fx} & {Fy} \\\\" +
+                    $"\\end{{array}}\\right)\\)");
+                return new TestData(final.ToArray(), Ax, Ay, Az);
+            }
         }
 
         private char[] GenLetters(int seed)
