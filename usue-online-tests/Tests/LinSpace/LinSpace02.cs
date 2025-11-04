@@ -9,11 +9,12 @@ using Test_Wrapper;
 
 namespace usue_online_tests.Tests.PolynomA
 {
-    public class LinSpace02 : ITestCreator, ITest, ITestGroup
+    public class LinSpace02 : ITestCreator, ITest, ITestGroup, ITimeLimit
     {
         public int TestID { get; set; }
         public string Name { get; } = "Определение подпространства02";
         public string Description { get; } = "Определение подпространства";
+        public int TimeLimitSeconds { get; set; } = 60;
         public string GroupName { get; set; } = "LinSpace";
         private static readonly char[] LetterU = { 'U', 'V', 'W', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
         private static readonly char[] LetterB = { 'M', 'P', 'Q', 'X', 'Y', 'Z', 'T' };
@@ -39,26 +40,52 @@ namespace usue_online_tests.Tests.PolynomA
 
         public int CheckAnswer(int randomSeed, Dictionary<string, string> answers)
         {
-            var _struct = GenFormuls(randomSeed);
-            string[] questions = _struct.Formuls;
+            var _gf = GenFormuls(randomSeed);
+            int[] nums = { _gf.Ax, _gf.Az, _gf.Ay };
+            string[] questions = _gf.Formuls;
 
-            int[] nums = { _struct.Ax, _struct.Ay, _struct.Az };
+            int index = 0;
+            int failCheck = 0;
+            int total = 0;
 
-            var total = 0;
-            int index = 1;
-
-            foreach (var answer in answers)
+            for (int i = 0; i < 6; i++)
             {
-                if (answers.TryGetValue(questions[index-1], out var va) && va == "on" && nums.Contains(index++)) total++;
+                if (answers.TryGetValue(questions[index - 1], out var va) && va == "on" && nums.Contains(index++))
+                {
+                    total += 2;
+                }
+                else
+                {
+                    failCheck += 1;
+                }
             }
-            
 
-            return total==3 ? 6 : total;
+            if (failCheck > 2)
+            {
+                total = 0;
+            }
+            else
+            {
+                total = failCheck <= total ? total - failCheck : 0;
+            }
+            return total;
         }
 
-        private record TestData(
-            string[] Formuls,
-            int Ax, int Ay, int Az);
+        private struct TestData
+        {
+            public string[] Formuls;
+            public int Ax;
+            public int Ay;
+            public int Az;
+
+            public TestData(string[] formuls, int ax, int ay, int az)
+            {
+                Formuls = formuls;
+                Ax = ax;
+                Ay = ay;
+                Az = az;
+            }
+        }
 
 
         private TestData GenFormuls(int seed)

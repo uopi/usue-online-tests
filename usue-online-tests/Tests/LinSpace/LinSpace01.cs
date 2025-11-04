@@ -8,11 +8,12 @@ using Test_Wrapper;
 
 namespace usue_online_tests.Tests.PolynomA
 {
-    public class LinSpace01 : ITestCreator, ITest, ITestGroup
+    public class LinSpace01 : ITestCreator, ITest, ITestGroup, ITimeLimit
     {
         public int TestID { get; set; }
         public string Name { get; } = "Определение подпространства01";
         public string Description { get; } = "Определение подпространства";
+        public int TimeLimitSeconds { get; set; } = 60;
         public string GroupName { get; set; } = "LinSpace";
         private static readonly char[] LetterU = { 'U', 'V', 'W', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
         private static readonly char[] LetterA = { 'p', 'q', 'r', 'y', 'z', 't' };
@@ -38,17 +39,33 @@ namespace usue_online_tests.Tests.PolynomA
         public int CheckAnswer(int randomSeed, Dictionary<string, string> answers)
         {
             int[] nums = GenNum(randomSeed).Take(3).ToArray();
-            //int i = 1;
-            //foreach (var num in nums)
-            //{
-            //    Console.WriteLine($"CheckAnsw {i++} {num}");
-            //}
 
             string[] questions = GenFormuls(randomSeed);
             var total = 0;
 
+            int index = 1;
+            int failCheck = 0;
+
             for (int i = 0; i < 6; i++)
-                if (answers.TryGetValue(questions[i], out var va) && va == "on" && nums.Contains(i + 1)) total++;
+            {
+                if (answers.TryGetValue(questions[index - 1], out var va) && va == "on" && nums.Contains(index++))
+                {
+                    total += 2;
+                }
+                else
+                {
+                    failCheck += 1;
+                }
+            }
+
+            if (failCheck > 2)
+            {
+                total = 0;
+            }
+            else
+            {
+                total = failCheck <= total ? total - failCheck : 0;
+            }
 
             return total;
         }
